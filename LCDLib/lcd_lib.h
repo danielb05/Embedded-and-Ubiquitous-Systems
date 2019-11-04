@@ -10,25 +10,28 @@ Rafael Câmara Pereira
 #define LCDLib_H
 
 #include "Arduino.h"
+#include <SoftwareSerial.h>
 
 class LCDLib{
 
     public:
         LCDLib();
 		// Defines the virtual port used with the Serial LCD
-        begin(SoftwareSerial *sf_serial_port);
+        void begin(SoftwareSerial *sf_serial_port);
 		// Prints the str string at the (x,y) location
-        print(int x, int y, char *str);		
+        void print(int x, int y, char *str);		
         // Set the pixel at coordinate (x,y)
-		sPixel (int x, int y);
+		void sPixel (int x, int y);
 		// Clear the pixel at coordinate (x,y)
-		clPixel (int x, int y);
+		void clPixel (int x, int y);
 		// Draws a line from (x1,y1) to (x2,y2) with ink value (0 clear, 1 set)
-		line(int x1, int y1,  int x2, int y2, int ink);
+		void line(int x1, int y1,  int x2, int y2, int ink);
 		// Draw a rectangle with ink value  with ink value (0 clear, 1 set)
-		rectangle (int x, int y, int length, int height, int ink);
+		void rectangle (int x, int y, int length, int height, int ink);
 		// Draw a circle with center at (x,y) and radius 
-		circle (int x, int y, int radius);
+		void circle (int x, int y, int radius);
+		
+		SoftwareSerial *virtualPort;
 		
 		byte START_COMMAND_SCREEN = 0x7C;
 		byte CLEAR_SCREEN = 0x00;

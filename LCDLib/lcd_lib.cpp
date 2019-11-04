@@ -7,78 +7,75 @@ Rafael Câmara Pereira
 */
 
 #include "Arduino.h"
-#include "LCDLib.h"
+#include "lcd_lib.h"
 
 // Constructor
 LCDLib::LCDLib(){};
 	        
 // Defines the virtual port used with the Serial LCD
-LCDLib::begin(SoftwareSerial *sf_serial_port){
-	
-	Serial.begin(115200);
-	while (!Serial) {
-		; // wait for serial port to connect. Needed for native USB port only
-	}
-	
-	sf_serial_port.begin(115200);
+void LCDLib::begin(SoftwareSerial *sf_serial_port){
+	virtualPort = sf_serial_port;
+	virtualPort->begin(115200);
+	virtualPort->write(START_COMMAND_SCREEN);
+	virtualPort->write(CLEAR_SCREEN);
 };
 
 // Prints the str string at the (x,y) location
-LCDLib::print(int x, int y, char *str){
-	Serial.write(START_COMMAND_SCREEN);
-	Serial.write(X_POSITION_SCREEN);
-	Serial.write((byte)x);
-	Serial.write(START_COMMAND_SCREEN);
-	Serial.write(Y_POSITION_SCREEN);
-	Serial.write((byte)y);
-	Serial.write(str);
+void LCDLib::print(int x, int y, char *str){
+	virtualPort->write(START_COMMAND_SCREEN);
+	/*virtualPort->write(X_POSITION_SCREEN);
+	virtualPort->write((byte)x);
+	virtualPort->write(START_COMMAND_SCREEN);
+	virtualPort->write(Y_POSITION_SCREEN);
+	virtualPort->write((byte)y);
+	*/virtualPort->print(str);
 };
 
 // Set the pixel at coordinate (x,y)
-LCDLib::Pixel (int x, int y){
-	Serial.write(START_COMMAND_SCREEN);
-	Serial.write(SET_PIXEL_SCREEN);
-	Serial.write((byte)x);
-	Serial.write((byte)y);
-	Serial.write(ACTIVE);
+void LCDLib::sPixel (int x, int y){
+	virtualPort->write(START_COMMAND_SCREEN);
+	virtualPort->write(SET_PIXEL_SCREEN);
+	virtualPort->write((byte)x);
+	virtualPort->write((byte)y);
+	virtualPort->write(ACTIVE);
 };
 
 // Clear the pixel at coordinate (x,y)
-LCDLib::clPixel (int x, int y){
-	Serial.write(START_COMMAND_SCREEN);
-	Serial.write(SET_PIXEL_SCREEN);
-	Serial.write((byte)x);
-	Serial.write((byte)y);
-	Serial.write(INACTIVE);
+void LCDLib::clPixel (int x, int y){
+	virtualPort->write(START_COMMAND_SCREEN);
+	virtualPort->write(SET_PIXEL_SCREEN);
+	virtualPort->write((byte)x);
+	virtualPort->write((byte)y);
+	virtualPort->write(INACTIVE);
 };
 
 // Draws a line from (x1,y1) to (x2,y2) with ink value (0 clear, 1 set)
-LCDLib::line(int x1, int y1,  int x2, int y2, int ink){
-	Serial.write(START_COMMAND_SCREEN);
-	Serial.write(DRAW_LINE_SCREEN);
-	Serial.write((byte)x1);
-	Serial.write((byte)y1);
-	Serial.write((byte)x2);
-	Serial.write((byte)y2);
-	Serial.write((byte)ink);
+void LCDLib::line(int x1, int y1,  int x2, int y2, int ink){
+	virtualPort->write(START_COMMAND_SCREEN);
+	virtualPort->write(DRAW_LINE_SCREEN);
+	virtualPort->write((byte)x1);
+	virtualPort->write((byte)y1);
+	virtualPort->write((byte)x2);
+	virtualPort->write((byte)y2);
+	virtualPort->write((byte)ink);
 };
 
 // Draw a rectangle with ink value  with ink value (0 clear, 1 set)
-LCDLib::rectangle (int x, int y, int length, int height, int ink){
-	Serial.write(START_COMMAND_SCREEN);
-	Serial.write(DRAW_RECTANGLE_SCREEN);
-	Serial.write((byte)x);
-	Serial.write((byte)y);
-	Serial.write((byte)length);
-	Serial.write((byte)height);
-	Serial.write((byte)ink);
+void LCDLib::rectangle (int x, int y, int length, int height, int ink){
+	virtualPort->write(START_COMMAND_SCREEN);
+	virtualPort->write(DRAW_RECTANGLE_SCREEN);
+	virtualPort->write((byte)x);
+	virtualPort->write((byte)y);
+	virtualPort->write((byte)length);
+	virtualPort->write((byte)height);
+	virtualPort->write((byte)ink);
 };
 
 // Draw a circle with center at (x,y) and radius
-LCDLib::circle (int x, int y, int radius){
-	Serial.write(START_COMMAND_SCREEN);
-	Serial.write(DRAW_CIRCLE_SCREEN);
-	Serial.write((byte)x);
-	Serial.write((byte)y);
-	Serial.write((byte)radius);
+void LCDLib::circle (int x, int y, int radius){
+	virtualPort->write(START_COMMAND_SCREEN);
+	virtualPort->write(DRAW_CIRCLE_SCREEN);
+	virtualPort->write((byte)x);
+	virtualPort->write((byte)y);
+	virtualPort->write((byte)radius);
 };
