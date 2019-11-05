@@ -1,3 +1,9 @@
+/*
+Daniel Vieira Cordeiro
+Rafael Câmara Pereira
+Antonio Expósito Solis
+*/
+
 const byte numChars = 32;
 char receivedChars[numChars]; // an array to store the received data
 
