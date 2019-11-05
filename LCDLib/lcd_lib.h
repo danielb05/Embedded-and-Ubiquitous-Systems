@@ -18,6 +18,10 @@ class LCDLib{
         LCDLib();
 		// Defines the virtual port used with the Serial LCD
         void begin(SoftwareSerial *sf_serial_port);
+		// Clears all the screen
+        void eraseScreen();
+		// Clears the line and below
+        void eraseBox(int x);
 		// Prints the str string at the (x,y) location
         void print(int x, int y, char *str);		
         // Set the pixel at coordinate (x,y)
@@ -29,12 +33,13 @@ class LCDLib{
 		// Draw a rectangle with ink value  with ink value (0 clear, 1 set)
 		void rectangle (int x, int y, int length, int height, int ink);
 		// Draw a circle with center at (x,y) and radius 
-		void circle (int x, int y, int radius);
+		void circle (int x, int y, int radius, int ink);
 		
 		SoftwareSerial *virtualPort;
 		
 		byte START_COMMAND_SCREEN = 0x7C;
 		byte CLEAR_SCREEN = 0x00;
+		byte CLEAR_BOX = 0x05;
 		byte X_POSITION_SCREEN = 0x18;
 		byte Y_POSITION_SCREEN = 0x19;
 		byte SET_PIXEL_SCREEN = 0x10;

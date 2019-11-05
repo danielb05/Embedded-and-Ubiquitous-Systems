@@ -16,19 +16,35 @@ LCDLib::LCDLib(){};
 void LCDLib::begin(SoftwareSerial *sf_serial_port){
 	virtualPort = sf_serial_port;
 	virtualPort->begin(115200);
+	eraseScreen();
+};
+
+// Clears all the screen
+void LCDLib::eraseScreen(){
 	virtualPort->write(START_COMMAND_SCREEN);
 	virtualPort->write(CLEAR_SCREEN);
+}
+
+// Clears the line and below
+void LCDLib::eraseBox(int x){
+	virtualPort->write(START_COMMAND_SCREEN);
+	virtualPort->write(CLEAR_BOX);
+	virtualPort->write((byte)0);
+	virtualPort->write((byte)0);
+	virtualPort->write((byte)127);
+	virtualPort->write((byte)x);
 };
 
 // Prints the str string at the (x,y) location
 void LCDLib::print(int x, int y, char *str){
 	virtualPort->write(START_COMMAND_SCREEN);
-	/*virtualPort->write(X_POSITION_SCREEN);
+	virtualPort->write(X_POSITION_SCREEN);
 	virtualPort->write((byte)x);
 	virtualPort->write(START_COMMAND_SCREEN);
 	virtualPort->write(Y_POSITION_SCREEN);
 	virtualPort->write((byte)y);
-	*/virtualPort->print(str);
+	//virtualPort->write(START_COMMAND_SCREEN);
+	virtualPort->write(str);
 };
 
 // Set the pixel at coordinate (x,y)
@@ -68,14 +84,15 @@ void LCDLib::rectangle (int x, int y, int length, int height, int ink){
 	virtualPort->write((byte)y);
 	virtualPort->write((byte)length);
 	virtualPort->write((byte)height);
-	virtualPort->write((byte)ink);
+	//virtualPort->write((byte)ink);
 };
 
 // Draw a circle with center at (x,y) and radius
-void LCDLib::circle (int x, int y, int radius){
+void LCDLib::circle (int x, int y, int radius, int ink){
 	virtualPort->write(START_COMMAND_SCREEN);
 	virtualPort->write(DRAW_CIRCLE_SCREEN);
 	virtualPort->write((byte)x);
 	virtualPort->write((byte)y);
 	virtualPort->write((byte)radius);
+	virtualPort->write((byte)ink);
 };

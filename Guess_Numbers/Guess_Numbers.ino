@@ -32,18 +32,26 @@ void loop()
 void startGameScreen()
 {
 
+  int i, j;
   char rc;
   
-  //lcdControl.rectangle(0, 0, 127, 63, 1);
+  lcdControl.rectangle(0, 0, 127, 63, 1);
   lcdControl.circle(63, 32, 30, 1);
 
-  char endMarker = '\n';
-  rc = Serial.read();
+/*
+  lcdControl.line(0, 0, 127, 63, 1);
+  lcdControl.line(0, 63, 127, 0, 1);
 
-  if (rc == endMarker){
-    lcdControl.eraseScreen();
-    setUpGame();
+  for(i = 63; i >= 0; i--){
+    for(j = 0; j < 128; j++){
+      lcdControl.sPixel(j,i);
+    }
   }
+*/
+  lcdControl.eraseBox(63);
+  setUpGame();
+      
+//gameOngoing = true;
 }
 
 void setUpGame()
@@ -117,7 +125,7 @@ void avaluateInput()
     }
     else
     {
-      lcdControl.eraseLine(39);
+      lcdControl.eraseBox(39);
 
       if (input > number)
       {
@@ -147,7 +155,7 @@ void randomHelp()
   {
 
   case 0: // Even or Odd
-    lcdControl.eraseLine(39);
+    lcdControl.eraseBox(39);
     if (number % 2 == 0)
     {
       msg = "It is an EVEN number.";
@@ -161,7 +169,7 @@ void randomHelp()
 
   // number of digits
   case 1:
-    lcdControl.eraseLine(39);
+    lcdControl.eraseBox(39);
     if (number > 999)
     {
       msg = "It has 4 digits.";
@@ -184,7 +192,7 @@ void randomHelp()
   // Last digit
   case 2:
 
-    lcdControl.eraseLine(39);
+    lcdControl.eraseBox(39);
     msg = "The last digit is: ";
     lcdControl.print(0, 39, msg);
     sprintf(msg, "%d", number % 10);
@@ -200,7 +208,7 @@ void randomHelp()
       num = num / 10;
     }
 
-    lcdControl.eraseLine(39);
+    lcdControl.eraseBox(39);
     msg = "The first digit is: ";
     lcdControl.print(0, 39, msg);
     sprintf(msg, "%d", num);
