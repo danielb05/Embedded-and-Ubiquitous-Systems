@@ -1,10 +1,9 @@
-/*
-Daniel Vieira Cordeiro
-Rafael Câmara Pereira
-Antonio Expósito Solis
-*/
+#include <lcd_lib.h>
 
+LCDLib lcdControl;
+SoftwareSerial lcdSerial(2, 3);
 const byte numChars = 32;
+char *msg;
 char receivedChars[numChars]; // an array to store the received data
 
 int number;
@@ -16,6 +15,7 @@ bool gameOngoing = false;
 void setup()
 {
   randomSeed(analogRead(0));
+  lcdControl.begin(&lcdSerial);
   Serial.begin(9600);
 }
 
@@ -23,15 +23,35 @@ void loop()
 {
   if (!gameOngoing)
   {
+    startGameScreen();
+  }else{
+    recvWithEndMarker();
+  }
+}
+
+void startGameScreen()
+{
+
+  char rc;
+  
+  //lcdControl.rectangle(0, 0, 127, 63, 1);
+  lcdControl.circle(63, 32, 30, 1);
+
+  char endMarker = '\n';
+  rc = Serial.read();
+
+  if (rc == endMarker){
+    lcdControl.eraseScreen();
     setUpGame();
   }
-  recvWithEndMarker();
 }
 
 void setUpGame()
 {
-  Serial.println("Guess a number from 1 to 1000");
-  Serial.println("\nPress h for a clue. \n");
+  msg = "Guess a number from 1 to 1000.";
+  lcdControl.print(0, 63, msg);
+  msg = "Press h for a clue.";
+  lcdControl.print(0, 47, msg);
   number = random(1001);
   //Serial.println(number);
   gameOngoing = true;
@@ -76,23 +96,39 @@ void avaluateInput()
     input = atoi(receivedChars);
     if (input == number)
     {
-      Serial.println("\nYou are correct!");
-      Serial.print("\nThe number was: ");
-      Serial.println(number);
-      Serial.print("\nNumber of attempts needed: ");
-      Serial.println(attempts);
-      Serial.print("Number of clues needed: ");
-      Serial.println(numberClues);
-      Serial.println("\n\nYOU WON!!!\n\n");
-      gameOngoing = false;
-    }
-    else if (input > number)
-    {
-      Serial.println("Try a smaller number.");
+      lcdControl.eraseScreen();
+      msg = "You are correct!";
+      lcdControl.print(0, 63, msg);
+      msg = "The number was:";
+      lcdControl.print(0, 55, msg);
+      sprintf(msg, "%d", number);
+      lcdControl.print(0, 47, msg);
+      msg = "Attempts:";
+      lcdControl.print(0, 39, msg);
+      sprintf(msg, "%d", attempts);
+      lcdControl.print(0, 31, msg);
+      msg = "Clues:";
+      lcdControl.print(0, 23, msg);
+      sprintf(msg, "%d", numberClues);
+      lcdControl.print(0, 15, msg);
+      msg = "YOU WON!!!";
+      lcdControl.print(0, 7, msg);
+      gameOngoing = true;
     }
     else
     {
-      Serial.println("Try a greater number.");
+      lcdControl.eraseLine(39);
+
+      if (input > number)
+      {
+        msg = "Try a smaller number.";
+      }
+      else
+      {
+        msg = "Try a greater number.";
+      }
+      
+      lcdControl.print(0, 39, msg);
     }
   }
   else if (receivedChars[0] == 'h' || receivedChars[0] == 'H')
@@ -111,41 +147,48 @@ void randomHelp()
   {
 
   case 0: // Even or Odd
+    lcdControl.eraseLine(39);
     if (number % 2 == 0)
     {
-      Serial.println("It is an EVEN number.");
+      msg = "It is an EVEN number.";
     }
     else
     {
-      Serial.println("It is an ODD number.");
+      msg = "It is an ODD number.";
     }
+    lcdControl.print(0, 39, msg);
     break;
 
   // number of digits
   case 1:
+    lcdControl.eraseLine(39);
     if (number > 999)
     {
-      Serial.println("The number has 4 digits - xxxx");
+      msg = "It has 4 digits.";
     }
-    else if (number > 99 && number < 999)
+    else if (number > 99 && number < 1000)
     {
-      Serial.println("The number has 3 digits - xxx");
+      msg = "It has 3 digits.";
     }
-    else if (number < 99 && number > 9)
+    else if (number < 100 && number > 9)
     {
-      Serial.println("The number has 2 digits - xx");
+      msg = "It has 2 digits.";
     }
     else
     {
-      Serial.println("The number has 1 digit - x");
+      msg = "It has 1 digit.";
     }
+    lcdControl.print(0, 39, msg);
     break;
 
   // Last digit
   case 2:
 
-    Serial.print("The last digit of the number is: ");
-    Serial.println(number % 10);
+    lcdControl.eraseLine(39);
+    msg = "The last digit is: ";
+    lcdControl.print(0, 39, msg);
+    sprintf(msg, "%d", number % 10);
+    lcdControl.print(0, 31, msg);
     break;
 
     // First digit
@@ -157,9 +200,11 @@ void randomHelp()
       num = num / 10;
     }
 
-    Serial.print("The first digit of the number is: ");
-    Serial.println(num);
+    lcdControl.eraseLine(39);
+    msg = "The first digit is: ";
+    lcdControl.print(0, 39, msg);
+    sprintf(msg, "%d", num);
+    lcdControl.print(0, 31, msg);
     break;
-    
   }
 }
