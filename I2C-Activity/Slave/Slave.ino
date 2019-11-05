@@ -11,40 +11,14 @@
 #define SLAVE_ADDR 0x04
 #define TRIG_PIN 11
 #define ECHO_PIN 12
+#define DHTPIN 3
+#define DHTTYPE DHT11
 
 // Variables
-int duration, cm;
+int duration, distance;
+float temperature, humidity;
 char accessVar;
-uint16_t tmp16;
-uint8_t tmp8;
-
-void receiveFunc(){
-  while(Wire.available()){
-    accessVar=(char)Wire.read();
-    Serial.print("Accessing: ");
-    Serial.print((char)accessVar);
-  }
-}
-
-void sendFunc(){
-uint8_t val[2];
-
-  Serial.print(" - Sending: ");
-  switch (accessVar){
-    case '1':
-       val[0]=23;
-       Serial.println(val[0]);
-       Wire.write(val[0]);
-      break;
-    case '2':
-       tmp16 = 2345;
-       Serial.println(tmp16);
-       val[0] = (tmp16>>8)&0xFF;
-       val[1] = tmp16&0xFF;
-       Wire.write(val,2);
-      break;
-  }
-}
+DHT dht = DHT(DHTPIN, DHTTYPE); // Initialize DHT sensor for normal 16mhz Arduino:
 
 void setup() {
   
@@ -57,16 +31,56 @@ void setup() {
   //Define inputs and outputs
   pinMode(TRIG_PIN, OUTPUT);
   pinMode(ECHO_PIN, INPUT);
+
+  // Setup DHT11 sensor:
+  dht.begin();
+
+  Serial.println("SLAVE");
+  Serial.println("Awaiting masters orderes... ");
 }
 
 void loop() {
-  
-  get();
-  
+  setUltrasonic();
+  setDHT11();
 }
 
-void getUltrasonic(){
+void receiveFunc(){
+  while(Wire.available()){
+    accessVar=(char)Wire.read();
+  }
+}
 
+void sendFunc(){
+    
+  switch (accessVar){
+
+    case '1':
+       Serial.println("Getting distance...");
+       printDistance();
+      
+       Wire.write(distance);
+      break;
+
+    case '2':
+        Serial.println("Getting temperature and humidity...");
+        printDHT11();
+
+        uint8_t val[2];
+        uint16_t tmp16 = (int)humidity;
+        tmp16 <<=8;
+        tmp16 |= (int)temperature;
+        Serial.println(tmp16);
+        val[0] = (tmp16>>8)&0xFF;
+        val[1] = tmp16&0xFF;
+        Wire.write(val,2);      
+        
+      break;
+  }
+
+  Serial.println("\nAwaiting masters orderes... ");
+}
+
+void setUltrasonic(){
   ultrasonicTrigger();
   readDuration();
   convertToCm();
@@ -89,6 +103,36 @@ void readDuration(){
 }
 
 // Convert the time into a distance
+// Distance = (traveltime/2) x speed of sound
+// The speed of sound is: 343m/s = 0.0343 cm/uS = 1/29.1 cm/uS
 void convertToCm(){
-  cm = (duration/2) / 29.1;     // Divide by 29.1 or multiply by 0.0343
+  distance = (duration/2) / 29.1;     // Divide by 29.1 or multiply by 0.0343
+}
+
+// Prints the measured distance in cm into the Serial Display
+void printDistance() {
+  Serial.print("\nDistance: ");
+  Serial.print(distance);
+  Serial.println(" cm");
+}
+
+void setDHT11(){
+  // Wait a few seconds between measurements:
+  delay(2000);
+  // Read the humidity in %:
+  humidity = dht.readHumidity();
+  // Read the temperature as Celsius:
+  temperature = dht.readTemperature();
+}
+
+// Prints the measured humidity and temperature into the Serial Display
+void printDHT11() {
+  Serial.print("\nTemperature: ");
+  Serial.print(temperature);
+  Serial.print("\xC2\xB0");
+  Serial.println("C");
+  Serial.print("Humidity: ");
+  Serial.print(humidity);
+  Serial.println("%");
+
 }
