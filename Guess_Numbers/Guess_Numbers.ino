@@ -36,18 +36,20 @@ void startGameScreen()
   char rc;
   
   lcdControl.rectangle(0, 0, 127, 63, 1);
+  delay(90);
   lcdControl.circle(63, 32, 30, 1);
-
-/*
+  delay(90);
   lcdControl.line(0, 0, 127, 63, 1);
+  delay(90);
   lcdControl.line(0, 63, 127, 0, 1);
 
+  delay(3000);
   for(i = 63; i >= 0; i--){
     for(j = 0; j < 128; j++){
       lcdControl.sPixel(j,i);
     }
   }
-*/
+  delay(90);
   lcdControl.eraseBox(63);
   setUpGame();
       
@@ -126,7 +128,8 @@ void avaluateInput()
     else
     {
       lcdControl.eraseBox(39);
-
+      delay(90);
+      
       if (input > number)
       {
         msg = "Try a smaller number.";
@@ -156,6 +159,7 @@ void randomHelp()
 
   case 0: // Even or Odd
     lcdControl.eraseBox(39);
+    delay(90);
     if (number % 2 == 0)
     {
       msg = "It is an EVEN number.";
@@ -170,6 +174,7 @@ void randomHelp()
   // number of digits
   case 1:
     lcdControl.eraseBox(39);
+    delay(90);
     if (number > 999)
     {
       msg = "It has 4 digits.";
@@ -193,8 +198,10 @@ void randomHelp()
   case 2:
 
     lcdControl.eraseBox(39);
+    delay(90);  
     msg = "The last digit is: ";
     lcdControl.print(0, 39, msg);
+    delay(90);
     sprintf(msg, "%d", number % 10);
     lcdControl.print(0, 31, msg);
     break;
@@ -209,8 +216,10 @@ void randomHelp()
     }
 
     lcdControl.eraseBox(39);
+    delay(90);  
     msg = "The first digit is: ";
     lcdControl.print(0, 39, msg);
+    delay(90);
     sprintf(msg, "%d", num);
     lcdControl.print(0, 31, msg);
     break;
