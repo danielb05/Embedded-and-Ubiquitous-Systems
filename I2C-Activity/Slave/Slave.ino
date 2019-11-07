@@ -69,7 +69,6 @@ void sendFunc(){
         uint16_t tmp16 = (int)humidity;
         tmp16 <<=8;
         tmp16 |= (int)temperature;
-        Serial.println(tmp16);
         val[0] = (tmp16>>8)&0xFF;
         val[1] = tmp16&0xFF;
         Wire.write(val,2);      
