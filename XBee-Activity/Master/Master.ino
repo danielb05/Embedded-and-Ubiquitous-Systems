@@ -14,7 +14,7 @@ SoftwareSerial xbeeSerial(2, 3);
 
 char inputChar;
 uint16_t cal16;
-uint8_t cal8;
+char cal8[255];
 uint8_t array[2];
 float X, Y, Z;  // Accelerometer values
 Adafruit_ADXL345_Unified accel = Adafruit_ADXL345_Unified();
@@ -39,39 +39,43 @@ void loop() {
   if (inputChar=='1' | inputChar=='2' | inputChar=='3'){
     Serial.print("\nRequesting information");
     xbeeSerial.write(inputChar);
-    delay(3000);
-  switch (inputChar){
-    
-    case '1':
+    int i = 0;
+  if(inputChar == '1'){
     
       Serial.println(" from the Ultrasonic sensor:");
 
-     while(xbeeSerial.available());
-      cal8= xbeeSerial.read();
-      Serial.print(cal8);
+     while(!xbeeSerial.available());
+     while(xbeeSerial.available()){
+      cal8[i]= xbeeSerial.read();
+      delay(50);
+      i++;
+     }
+     cal8[i]= '\0';
+      
       printDistance();
-    break;
-    
-    case '2':
-    
+  } else if(inputChar == '2'){
       Serial.println(" from the DHT11 sensor:");
       
-      while(xbeeSerial.available());
+      while(!xbeeSerial.available());
+     while(xbeeSerial.available()){
+      Serial.print(cal8);
+      cal8[i]= xbeeSerial.read();
+      delay(50);
+      i++;
+     }
+     cal8[i]= '\0';
+      /*
       cal16=(xbeeSerial.read()<<8);
       cal16=cal16|xbeeSerial.read();
       array[0]=cal16 & 0xff;
       array[1]=(cal16 >> 8);
-
+      */
+      Serial.print(cal8);
       printTemperatureAndHumidity();
-      
-    break;
-    
-    case '3':
-    
+  } else if(inputChar == '3'){ 
       Serial.println(" from the ADXL345 Accelerometer:");
       setAccelerometer();
       printAccelerometer();
-    break;
   }
   }
 }

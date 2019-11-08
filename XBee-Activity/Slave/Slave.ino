@@ -67,6 +67,7 @@ void sendFunc(){
        printDistance();
       
        xbeeSerial.print(distance);
+       delay(200);
        accessVar = '0';
       break;
 
@@ -74,13 +75,10 @@ void sendFunc(){
         Serial.println("Getting temperature and humidity...");
         printDHT11();
 
-        uint8_t val[2];
-        uint16_t tmp16 = (int)humidity;
-        tmp16 <<=8;
-        tmp16 |= (int)temperature;
-        val[0] = (tmp16>>8)&0xFF;
-        val[1] = tmp16&0xFF;
-        //xbeeSerial.print(val,2);      
+        xbeeSerial.print(temperature);
+        xbeeSerial.print('x');
+        xbeeSerial.print(humidity);
+        delay(200);   
         accessVar = '0';
       break;
   }
