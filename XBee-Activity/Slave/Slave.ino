@@ -17,7 +17,6 @@
 // Variables
 int duration, distance;
 float temperature, humidity;
-char accessVar;
 DHT dht = DHT(DHTPIN, DHTTYPE); // Initialize DHT sensor for normal 16mhz Arduino:
 
 SoftwareSerial xbeeSerial(2, 3);
@@ -28,9 +27,6 @@ void setup() {
   Serial.begin(9600);
   xbeeSerial.begin(9600);
   
-  //xbeeSerial.onReceive(receiveFunc);
-  //xbeeSerial.onRequest(sendFunc);
-
   //Define inputs and outputs
   pinMode(TRIG_PIN, OUTPUT);
   pinMode(ECHO_PIN, INPUT);
@@ -39,51 +35,25 @@ void setup() {
   dht.begin();
 
   Serial.println("SLAVE");
-  Serial.println("Awaiting masters orderes... ");
 }
 
 void loop() {
   setUltrasonic();
   setDHT11();
-  receiveFunc();
-}
-
-void receiveFunc(){
-  while(xbeeSerial.available()){
-    accessVar=(char)xbeeSerial.read();
-  }
-  
-  if(accessVar == '1' || accessVar == '2'){
-    sendFunc();
-  }
+  sendFunc();
 }
 
 void sendFunc(){
     
-  switch (accessVar){
-
-    case '1':
-       Serial.println("Getting distance...");
-       printDistance();
-      
-       xbeeSerial.print(distance);
-       delay(200);
-       accessVar = '0';
-      break;
-
-    case '2':
-        Serial.println("Getting temperature and humidity...");
-        printDHT11();
-
-        xbeeSerial.print(temperature);
-        xbeeSerial.print('x');
-        xbeeSerial.print(humidity);
-        delay(200);   
-        accessVar = '0';
-      break;
-  }
-
-  Serial.println("\nAwaiting masters orderes... ");
+  printDistance();
+  printDHT11();
+ 
+  xbeeSerial.print(distance);
+  xbeeSerial.print('x');
+  xbeeSerial.print(temperature);
+  xbeeSerial.print('x');
+  xbeeSerial.print(humidity);
+  delay(5000);
 }
 
 void setUltrasonic(){
@@ -133,7 +103,7 @@ void setDHT11(){
 
 // Prints the measured humidity and temperature into the Serial Display
 void printDHT11() {
-  Serial.print("\nTemperature: ");
+  Serial.print("Temperature: ");
   Serial.print(temperature);
   Serial.print("\xC2\xB0");
   Serial.println("C");
