@@ -53,6 +53,7 @@ void sendFunc(){
   xbeeSerial.print(temperature);
   xbeeSerial.print('x');
   xbeeSerial.print(humidity);
+  xbeeSerial.print('y');
   delay(5000);
 }
 
