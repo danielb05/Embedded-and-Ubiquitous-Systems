@@ -29,7 +29,8 @@ static msg_t Thread_LED1(void *p) {
   chRegSetThreadName("blinker-1");
   while (TRUE) {
     chBSemWait(&smph);
-    for(int cont=0; cont <5; cont ++){
+    int cont;
+    for(cont=0; cont <5; cont ++){
       palSetPad(GPIO25_PORT, GPIO25_PAD);
       chThdSleepMilliseconds(500);
       palClearPad(GPIO25_PORT, GPIO25_PAD);
@@ -47,7 +48,8 @@ static msg_t Thread_LED2(void *p) {
   while (TRUE) {
     chBSemWait(&smph);
     palSetPad(GPIO18_PORT, GPIO18_PAD);
-    for(int cont=0; cont <5; cont ++){
+    int cont;
+    for(cont=0; cont <5; cont ++){
       palSetPad(GPIO25_PORT, GPIO25_PAD);
       chThdSleepMilliseconds(100);
       palClearPad(GPIO25_PORT, GPIO25_PAD);
@@ -68,6 +70,8 @@ int main(void) {
 
   palSetPadMode(GPIO25_PORT, GPIO25_PAD, PAL_MODE_OUTPUT);
   palSetPadMode(GPIO18_PORT, GPIO18_PAD, PAL_MODE_OUTPUT);
+
+  chBSemInit(&smph, 0);
 
   chThdCreateStatic(waThread_LED1, sizeof(waThread_LED1), NORMALPRIO, Thread_LED1, NULL);
   chThdCreateStatic(waThread_LED2, sizeof(waThread_LED2), NORMALPRIO, Thread_LED2, NULL);
