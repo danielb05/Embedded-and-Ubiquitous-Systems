@@ -71,6 +71,8 @@ int main(void) {
   palSetPadMode(GPIO25_PORT, GPIO25_PAD, PAL_MODE_OUTPUT);
   palSetPadMode(GPIO18_PORT, GPIO18_PAD, PAL_MODE_OUTPUT);
 
+  chBSemInit(&smph, 0);
+
   chThdCreateStatic(waThread_LED1, sizeof(waThread_LED1), NORMALPRIO, Thread_LED1, NULL);
   chThdCreateStatic(waThread_LED2, sizeof(waThread_LED2), HIGHPRIO, Thread_LED2, NULL);
 
