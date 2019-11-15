@@ -22,6 +22,12 @@
 #include "chvt.h"
 #include "hal.h"
 
+static void led_clear(void *arg);
+static void led_set(void *arg);
+
+static VirtualTimer led_vt1;
+
+/*
 static WORKING_AREA(waThread_LED1, 128);
 static msg_t Thread_LED1(void *p) {
   (void)p;
@@ -35,19 +41,16 @@ static msg_t Thread_LED1(void *p) {
   }
   return 0;
 }
+*/
 
-static WORKING_AREA(waThread_LED2, 128);
-static msg_t Thread_LED2(void *p) {
-  (void)p;
-  chRegSetThreadName("blinker-2");
-  while (TRUE) {
-    palClearPad(GPIO18_PORT, GPIO18_PAD);
-    chThdSleepMilliseconds(500);
-    palSetPad(GPIO18_PORT, GPIO18_PAD);
-    chThdSleepMilliseconds(500);
-    //chThdYield();
-  }
-  return 0;
+static void led_clear(void *arg){
+	palClearPad(GPIO25_PORT, GPIO25_PAD);
+	chVTSetI(&led_vt1, MS2ST(500), led_set, NULL);
+}
+
+static void led_set(void *arg){
+	palSetPad(GPIO25_PORT, GPIO25_PAD);
+	chVTSetI(&led_vt1, MS2ST(500), led_clear, NULL);
 }
 
 /*
@@ -58,11 +61,9 @@ int main(void) {
   chSysInit();
 
   palSetPadMode(GPIO25_PORT, GPIO25_PAD, PAL_MODE_OUTPUT);
-  palSetPadMode(GPIO18_PORT, GPIO18_PAD, PAL_MODE_OUTPUT);
 
-  chThdCreateStatic(waThread_LED1, sizeof(waThread_LED1), NORMALPRIO, Thread_LED1, NULL);
-  chThdCreateStatic(waThread_LED2, sizeof(waThread_LED2), NORMALPRIO, Thread_LED2, NULL);
-
+  //chThdCreateStatic(waThread_LED1, sizeof(waThread_LED1), HIGHPRIO, Thread_LED1, NULL);
+  chVTSetI(&led_vt1, MS2ST(2000), led_set, NULL);
   // Blocks until finish
   chThdWait(chThdSelf());
 
