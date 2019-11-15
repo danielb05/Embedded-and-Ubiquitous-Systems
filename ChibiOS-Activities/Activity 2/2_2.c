@@ -31,6 +31,7 @@ static WORKING_AREA(waThread_LED1, 128);
 static msg_t Thread_LED1(void *p) {
   (void)p;
   chRegSetThreadName("blinker-1");
+  chVTSetI(&led_vt1, MS2ST(2000), led_set, NULL);
   while (TRUE) {
 	if(chVTIsArmedI(&led_vt1))
 		palSetPad(GPIO18_PORT, GPIO18_PAD);
