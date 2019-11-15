@@ -19,19 +19,23 @@
 */
 
 #include "ch.h"
-#include "chvt.h"
 #include "hal.h"
+
+BSEMAPHORE_DECL(smph,0);
 
 static WORKING_AREA(waThread_LED1, 128);
 static msg_t Thread_LED1(void *p) {
   (void)p;
   chRegSetThreadName("blinker-1");
   while (TRUE) {
-    palClearPad(GPIO25_PORT, GPIO25_PAD);
-    chThdSleepMilliseconds(100);
-    palSetPad(GPIO25_PORT, GPIO25_PAD);
-    chThdSleepMilliseconds(900);
-    //chThdYield();
+    chBSemWait(&smph);
+    for(int cont=0; cont <5; cont ++){
+      palSetPad(GPIO25_PORT, GPIO25_PAD);
+      chThdSleepMilliseconds(500);
+      palClearPad(GPIO25_PORT, GPIO25_PAD);
+      chThdSleepMilliseconds(500);
+    }
+    chBSemSignal(&smph);
   }
   return 0;
 }
@@ -41,11 +45,16 @@ static msg_t Thread_LED2(void *p) {
   (void)p;
   chRegSetThreadName("blinker-2");
   while (TRUE) {
-    palClearPad(GPIO18_PORT, GPIO18_PAD);
-    chThdSleepMilliseconds(500);
+    chBSemWait(&smph);
     palSetPad(GPIO18_PORT, GPIO18_PAD);
-    chThdSleepMilliseconds(500);
-    //chThdYield();
+    for(int cont=0; cont <5; cont ++){
+      palSetPad(GPIO25_PORT, GPIO25_PAD);
+      chThdSleepMilliseconds(100);
+      palClearPad(GPIO25_PORT, GPIO25_PAD);
+      chThdSleepMilliseconds(300);
+    }
+    palClearPad(GPIO18_PORT, GPIO18_PAD);
+    chBSemSignal(&smph);
   }
   return 0;
 }
