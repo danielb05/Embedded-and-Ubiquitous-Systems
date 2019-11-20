@@ -21,14 +21,14 @@
 #include "ch.h"
 #include "hal.h"
 
-BSEMAPHORE_DECL(smph,2);
+SEMAPHORE_DECL(smph,2);
 
 static WORKING_AREA(waThread_LED1, 128);
 static msg_t Thread_LED1(void *p) {
   (void)p;
   chRegSetThreadName("blinker-1");
   while (TRUE) {
-    chBSemWait(&smph);
+    chSemWait(&smph);
     int cont;
     for(cont=0; cont <5; cont ++){
       palSetPad(GPIO25_PORT, GPIO25_PAD);
@@ -36,7 +36,7 @@ static msg_t Thread_LED1(void *p) {
       palClearPad(GPIO25_PORT, GPIO25_PAD);
       chThdSleepMilliseconds(500);
     }
-    chBSemSignal(&smph);
+    chSemSignal(&smph);
   }
   return 0;
 }
@@ -46,7 +46,7 @@ static msg_t Thread_LED2(void *p) {
   (void)p;
   chRegSetThreadName("blinker-2");
   while (TRUE) {
-    chBSemWait(&smph);
+    chSemWait(&smph);
     palSetPad(GPIO18_PORT, GPIO18_PAD);
     int cont;
     for(cont=0; cont <5; cont ++){
@@ -56,7 +56,7 @@ static msg_t Thread_LED2(void *p) {
       chThdSleepMilliseconds(300);
     }
     palClearPad(GPIO18_PORT, GPIO18_PAD);
-    chBSemSignal(&smph);
+    chSemSignal(&smph);
   }
   return 0;
 }
@@ -71,7 +71,7 @@ int main(void) {
   palSetPadMode(GPIO25_PORT, GPIO25_PAD, PAL_MODE_OUTPUT);
   palSetPadMode(GPIO18_PORT, GPIO18_PAD, PAL_MODE_OUTPUT);
 
-  chBSemInit(&smph, 2);
+  chSemInit(&smph, 2);
 
   chThdCreateStatic(waThread_LED1, sizeof(waThread_LED1), NORMALPRIO, Thread_LED1, NULL);
   chThdCreateStatic(waThread_LED2, sizeof(waThread_LED2), HIGHPRIO, Thread_LED2, NULL);
