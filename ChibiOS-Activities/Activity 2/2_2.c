@@ -31,7 +31,6 @@ static WORKING_AREA(waThread_LED1, 128);
 static msg_t Thread_LED1(void *p) {
   (void)p;
   chRegSetThreadName("blinker-1");
-  chVTSetI(&led_vt1, MS2ST(2000), led_set, NULL);
   while (TRUE) {
 	if(chVTIsArmedI(&led_vt1))
 		palSetPad(GPIO18_PORT, GPIO18_PAD);
@@ -65,7 +64,7 @@ int main(void) {
   palSetPadMode(GPIO18_PORT, GPIO18_PAD, PAL_MODE_OUTPUT);
 
   chThdCreateStatic(waThread_LED1, sizeof(waThread_LED1), HIGHPRIO, Thread_LED1, NULL);
-  //chVTSetI(&led_vt1, MS2ST(2000), led_set, NULL);
+  chVTSetI(&led_vt1, MS2ST(2000), led_set, NULL);
   // Blocks until finish
   chThdWait(chThdSelf());
 
