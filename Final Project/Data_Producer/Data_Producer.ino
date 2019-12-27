@@ -1,7 +1,3 @@
-/*
- * SLAVE CONFIG
- */
-
 // Include the libraries:
 #include <Adafruit_Sensor.h>
 #include "SoftwareSerial.h"
@@ -34,7 +30,7 @@ void setup() {
   // Setup DHT11 sensor:
   dht.begin();
 
-  Serial.println("SLAVE");
+  Serial.println("Data Producer");
 }
 
 void loop() {
