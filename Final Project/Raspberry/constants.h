@@ -2,6 +2,12 @@
 #include "stdio.h"
 #include "stdlib.h"
 #include "string"
+#include "lcd_lib.h"
+#include "ch.h"
+#include "chvt.h"
+#include "hal.h"
+#include "chprintf.h"
+#include "SoftwareSerial.h"
 
 
 // Device address
@@ -22,3 +28,8 @@
 // Slave address
 // static const uint8_t
 #define slave_address = 0x04;
+
+// Requests
+
+#define ACCELEROMETER = 0
+#define SENSORS = 1
