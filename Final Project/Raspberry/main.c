@@ -25,7 +25,7 @@ SoftwareSerial lcdSerial(2, 3);
 LCDLib lcdControl;
 
 int x, y, z;
-int distanceI, distanceD, temperatureI, temperatureD, humidityI, humidityD;
+char *distance, *temperature, *humidity;
 char msg[100];
 
 static WORKING_AREA(waThread_ARDUINO, 128);
@@ -34,7 +34,7 @@ static msg_t Thread_ARDUINO(void *p)
   (void)p;
   chRegSetThreadName("Thread_ARDUINO");
   uint8_t request = SENSORS;
-  uint8_t result[12];
+  uint8_t received[20];
   msg_t status;
 
   // Some time to allow slaves initialization
@@ -47,16 +47,12 @@ static msg_t Thread_ARDUINO(void *p)
     // Request values
     i2cMasterTransmitTimeout(
         &I2C0, slave_address, request, 1,
-        &result, 12, MS2ST(1000));
+        &received, 20, MS2ST(1000));
     chThdSleepMilliseconds(10);
 
-
-    distanceI = (((int)result[1]) << 8) | result[0];
-    distanceD = (((int)result[3]) << 8) | result[2];
-    temperatureI = (((int)result[5]) << 8) | result[4];
-    temperatureD = (((int)result[6]) << 8) | result[7];
-    humidityI = (((int)result[8]) << 8) | result[9];
-    humidityD = (((int)result[10]) << 8) | result[11];
+    distance = strtok(received, "x");
+    temperature = strtok(NULL, "x");
+    humidity = strtok(NULL, "x");
 
     chThdSleepMilliseconds(1000);
     chBSemSignal(&smph);
@@ -194,16 +190,16 @@ initializeAccelerometer()
 
 void printDistance()
 {
-    sprintf(msg, "Distance: %i.%icm", distanceI, distanceD);
+    sprintf(msg, "Distance: %s cm", distance);
     lcdControl.print(0, 63, msg);
 }
 
 void printTemperatureAndHumidity()
 {
-    sprintf(msg, "Temperature: %i.%ideg C", temperatureI, temperatureD);
+    sprintf(msg, "Temperature: %s deg C", temperature);
     lcdControl.print(0, 55, msg);
 
-    sprintf(msg, "Humidity: %i.%i percent", humidityI, humidityD);
+    sprintf(msg, "Humidity: %s percent", humidity);
     lcdControl.print(0, 47, msg);
 }
 
