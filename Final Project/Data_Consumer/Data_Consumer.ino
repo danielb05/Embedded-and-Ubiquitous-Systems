@@ -24,17 +24,13 @@ void setup()
 }
 
 void response_data(){
+
+  char text[10];
+  sprintf(text, "%s%s%s", distance, temperature, humidity);
+  Serial.println(text);
   
-  Wire.write("3");
-  Wire.write("0");
-  Wire.write("0");
-  Wire.write("0");
-  Wire.write("2");
-  Wire.write("7");
-  Wire.write("0");
-  Wire.write("6");
-  Wire.write("5");
-  Serial.print("Sent");
+  Wire.write(text,9);
+  Serial.println("Sent To Rapsberry");
 }
 
 void loop()
