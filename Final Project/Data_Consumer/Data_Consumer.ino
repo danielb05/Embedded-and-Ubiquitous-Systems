@@ -30,7 +30,10 @@ void response_data(){
   Serial.println(text);
   
   Wire.write(text,9);
-  Serial.println("Sent To Rapsberry");
+  /*Serial.print("Sent to I2C: ");
+  Serial.println(msg);
+  delay(80);
+  */
 }
 
 void loop()
@@ -62,10 +65,6 @@ void loop()
         Serial.print("\n");
         delay(80);
 
-        /*Serial.print("Sent to I2C: ");
-        Serial.println(msg);
-        delay(80);
-        */
         i = 0; 
     }    
 }
