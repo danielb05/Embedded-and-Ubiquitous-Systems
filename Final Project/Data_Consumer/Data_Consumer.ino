@@ -6,19 +6,35 @@ SoftwareSerial xbeeSerial(2, 3);
 #define SLAVE_ADDR 0x04
 #define SLEEP 500
 
-char received[255];
+char received[20];
 
-char msg[100];
+char msg[20];
 int i=0;
 char a;
 char *distance, *temperature, *humidity;
 char inputChar;
-
+uint8_t i2cReceiver;
 void setup()
 {
     Serial.begin(9600);
     xbeeSerial.begin(9600);
+    Wire.begin(SLAVE_ADDR);
+    Wire.onRequest(response_data);
     Serial.println("Data Consumer");
+}
+
+void response_data(){
+  
+  Wire.write("3");
+  Wire.write("0");
+  Wire.write("0");
+  Wire.write("0");
+  Wire.write("2");
+  Wire.write("7");
+  Wire.write("0");
+  Wire.write("6");
+  Wire.write("5");
+  Serial.print("Sent");
 }
 
 void loop()
@@ -30,15 +46,7 @@ void loop()
     if (a == 'y')
     {
         received[--i] = '\0';
-
-        Wire.beginTransmission(SLAVE_ADDR);
-        Wire.write(received);
-        Wire.endTransmission();
-
-        Serial.print("Sent to I2C: ");
-        Serial.println(received);
-        delay(80);
-
+        
         Serial.print("Distance: ");
         distance = strtok(received, "x");
         Serial.print(distance);
@@ -57,21 +65,11 @@ void loop()
         Serial.println("%");
         Serial.print("\n");
         delay(80);
-        
-        i = 0; 
-    }
 
-    while (!Serial.available())
-    {
-        inputChar = Serial.read();
-        if (inputChar=='1'){
-            Serial.print(distance);
-            Serial.print('x');
-            Serial.print(temperature);
-            Serial.print('x');
-            Serial.print(humidity);
-            Serial.print('x');
-        }
-    }
-    
+        /*Serial.print("Sent to I2C: ");
+        Serial.println(msg);
+        delay(80);
+        */
+        i = 0; 
+    }    
 }

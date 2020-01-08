@@ -6,7 +6,7 @@
 // Defines
 #define SLAVE_ADDR 0x04
 #define TRIG_PIN 12
-#define ECHO_PIN 11
+#define ECHO_PIN 10
 #define DHTPIN 7
 #define DHTTYPE DHT11
 
