@@ -11,8 +11,7 @@
 #define DHTTYPE DHT11
 
 // Variables
-int duration, distance;
-float temperature, humidity;
+int duration, distance, temperature, humidity;
 DHT dht = DHT(DHTPIN, DHTTYPE); // Initialize DHT sensor for normal 16mhz Arduino:
 
 SoftwareSerial xbeeSerial(2, 3);
@@ -43,13 +42,9 @@ void sendFunc(){
     
   printDistance();
   printDHT11();
- 
-  xbeeSerial.print(distance);
-  xbeeSerial.print('x');
-  xbeeSerial.print(temperature);
-  xbeeSerial.print('x');
-  xbeeSerial.print(humidity);
-  xbeeSerial.print('y');
+  char msg[20];
+  sprintf(msg, "%03dx%03dx%03dy", distance, temperature, humidity);
+  xbeeSerial.print(msg);
   delay(5000);
 }
 

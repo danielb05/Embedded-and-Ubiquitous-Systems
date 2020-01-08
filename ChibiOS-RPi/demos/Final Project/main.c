@@ -52,28 +52,30 @@ static msg_t Thread_ARDUINO(void *p)
     i2cMasterTransmit(
         &I2C0, slave_address, request, 1,
         &received, 9);
-		
+		received[9] = 0;
 	i2cReleaseBus(&I2C0);
     chThdSleepMilliseconds(10);
 
-/*
-	received[0] = 2;
-	received[1] = 5;
-	received[2] = 0;
-    sprintf(distance, "%s",  received[0]);
-    distance[3] = '\0';
-    sprintf(temperature, "%s",  received[3]);
-    temperature[3] = '\0';
-    sprintf(humidity, "%s",  received[6]);
-    humidity[3] = '\0';
-*/
+    distance[0] = received[0];
+    distance[1] = received[1];
+    distance[2] = received[2];
+    distance[3] = 0;
+    temperature[0] = received[3];
+    temperature[1] = received[4];
+    temperature[2] = received[5];
+    temperature[3] = 0;
+    humidity[0] = received[6];
+    humidity[1] = received[7];
+    humidity[2] = received[8];
+    humidity[3] = 0;
+
 
     chThdSleepMilliseconds(1000);
   }
   return 0;
 }
 
-static WORKING_AREA(waThread_ADXL, 128);
+static WORKING_AREA(waThread_ADXL, 256);
 static msg_t Thread_ADXL(void *p)
 {
   (void)p;
@@ -86,15 +88,14 @@ static msg_t Thread_ADXL(void *p)
   {
 	  i2cAcquireBus(&I2C0);
     //chBSemWait(&smph);
-        
+
     i2cMasterTransmit(
 		&I2C0, DEVICE_ADDRESS, &data, 1,
         result, 6);
 		
 	i2cReleaseBus(&I2C0);
-	
     chThdSleepMilliseconds(1000);
- /*   
+    /*
     chprintf((BaseSequentialStream *)&SD1, "A: %d ", result[0]);
         chThdSleepMilliseconds(10);
     chprintf((BaseSequentialStream *)&SD1, "B: %d ", result[1]);
@@ -141,14 +142,13 @@ static msg_t Thread_LCD(void *p)
     sdPut(&SD1, (uint8_t)0x38);
     chThdSleepMilliseconds(10);
 
-chprintf((BaseSequentialStream *)&SD1, "Temperature: %d deg C", received[0]);
-  /*
+
     printDistance();
     printTemperatureAndHumidity();
     printAccelerometer();
 
     chThdSleepMilliseconds(5000);
-    chBSemSignal(&smph);*/
+    chBSemSignal(&smph);
   }
   return 0;
 }
@@ -164,14 +164,14 @@ int main(void)
   initializeI2C();
   //Don't know if the next function will be necessary, so I've commented it out
   initializeLCD();
-  //initializeAccelerometer();
+  initializeAccelerometer();
 
   chBSemInit(&smph, 0);
 
   // Start threads
   chThdCreateStatic(waThread_LCD, sizeof(waThread_LCD), NORMALPRIO, Thread_LCD, NULL);
   chThdCreateStatic(waThread_ARDUINO, sizeof(waThread_ARDUINO), NORMALPRIO, Thread_ARDUINO, NULL);
-  //chThdCreateStatic(waThread_ADXL, sizeof(waThread_ADXL), NORMALPRIO, Thread_ADXL, NULL);
+  chThdCreateStatic(waThread_ADXL, sizeof(waThread_ADXL), NORMALPRIO, Thread_ADXL, NULL);
 
   /*
    * Events servicing loop.
@@ -207,7 +207,7 @@ void initializeI2C()
 void initializeAccelerometer()
 {
 
-  uint8_t request[2] = {POWER_CTL, 0x00};
+  uint8_t request[2] = {0x2D, 0x00};
   uint8_t result = 0;
 
   i2cMasterTransmit(
@@ -228,7 +228,7 @@ void initializeAccelerometer()
       &result, 0);
 
 	chThdSleepMilliseconds(10);
-   	request[0] = DATA_FORMAT;
+   	request[0] = 0x31;
     request[1] = 0x01;
   i2cMasterTransmit(
       &I2C0, DEVICE_ADDRESS, request, 2,

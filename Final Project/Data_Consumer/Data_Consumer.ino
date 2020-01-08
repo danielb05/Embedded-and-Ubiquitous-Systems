@@ -25,15 +25,7 @@ void setup()
 
 void response_data(){
   
-  Wire.write("3");
-  Wire.write("0");
-  Wire.write("0");
-  Wire.write("0");
-  Wire.write("2");
-  Wire.write("7");
-  Wire.write("0");
-  Wire.write("6");
-  Wire.write("5");
+  Wire.write("300027065", 9);
   Serial.print("Sent");
 }
 
