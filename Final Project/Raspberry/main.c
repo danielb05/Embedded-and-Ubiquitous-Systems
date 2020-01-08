@@ -1,19 +1,15 @@
 /*
     ChibiOS/RT - Copyright (C) 2006,2007,2008,2009,2010,
                  2011,2012 Giovanni Di Sirio.
-
     This file is part of ChibiOS/RT.
-
     ChibiOS/RT is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 3 of the License, or
     (at your option) any later version.
-
     ChibiOS/RT is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -25,6 +21,7 @@ BSEMAPHORE_DECL(smph,0);
 int x, y, z;
 char distance[4], temperature[4], humidity[4];
 char msg[100];
+uint8_t received[10];
 
 void printAccelerometer(void);
 void printTemperatureAndHumidity(void);
@@ -33,62 +30,68 @@ void initializeAccelerometer(void);
 void initializeI2C(void);
 void initializeLCD(void);
 
-static WORKING_AREA(waThread_ARDUINO, 128);
+static WORKING_AREA(waThread_ARDUINO, 256);
 static msg_t Thread_ARDUINO(void *p)
 {
   (void)p;
   chRegSetThreadName("Thread_ARDUINO");
   uint8_t request = SENSORS;
-  uint8_t received[10];
 
-	i2cAcquireBus(&I2C0);
   // Some time to allow slaves initialization
   chThdSleepMilliseconds(2000);
 
   while (TRUE)
   {
-    chBSemWait(&smph);
+    i2cAcquireBus(&I2C0);
 
     // Request values
     i2cMasterTransmit(
         &I2C0, slave_address, request, 1,
         &received, 9);
+		received[9] = 0;
+	i2cReleaseBus(&I2C0);
     chThdSleepMilliseconds(10);
 
-    sprintf(distance, "%s",  received[0]);
-    distance[3] = '\0';
-    sprintf(temperature, "%s",  received[3]);
-    temperature[3] = '\0';
-    sprintf(humidity, "%s",  received[6]);
-    humidity[3] = '\0';
+    distance[0] = received[0];
+    distance[1] = received[1];
+    distance[2] = received[2];
+    distance[3] = 0;
+    temperature[0] = received[3];
+    temperature[1] = received[4];
+    temperature[2] = received[5];
+    temperature[3] = 0;
+    humidity[0] = received[6];
+    humidity[1] = received[7];
+    humidity[2] = received[8];
+    humidity[3] = 0;
+
 
     chThdSleepMilliseconds(1000);
-    chBSemSignal(&smph);
-    i2cReleaseBus(&I2C0);
   }
   return 0;
 }
 
-static WORKING_AREA(waThread_ADXL, 128);
+static WORKING_AREA(waThread_ADXL, 256);
 static msg_t Thread_ADXL(void *p)
 {
   (void)p;
   chRegSetThreadName("Thread_ADXL");
 
   uint8_t result[] = {0, 0, 0, 0, 0, 0};
-
-	i2cAcquireBus(&I2C0);
+  int data = 0x32;
 	
   while (TRUE)
   {
-    chBSemWait(&smph);
-        
+	  i2cAcquireBus(&I2C0);
+    //chBSemWait(&smph);
+
     i2cMasterTransmit(
-		&I2C0, DEVICE_ADDRESS, DATAX0, 1,
+		&I2C0, DEVICE_ADDRESS, &data, 1,
         result, 6);
 		
+	i2cReleaseBus(&I2C0);
     chThdSleepMilliseconds(1000);
- /*   
+    /*
     chprintf((BaseSequentialStream *)&SD1, "A: %d ", result[0]);
         chThdSleepMilliseconds(10);
     chprintf((BaseSequentialStream *)&SD1, "B: %d ", result[1]);
@@ -108,13 +111,13 @@ static msg_t Thread_ADXL(void *p)
 
 	chThdSleepMilliseconds(4000);
 
-    chBSemSignal(&smph);
-    i2cReleaseBus(&I2C0);
+    //chBSemSignal(&smph);
+    
   }
   return 0;
 }
 
-static WORKING_AREA(waThread_LCD, 128);
+static WORKING_AREA(waThread_LCD, 256);
 static msg_t Thread_LCD(void *p)
 {
   (void)p;
@@ -122,7 +125,7 @@ static msg_t Thread_LCD(void *p)
 
   while (TRUE)
   {
-    chBSemWait(&smph);
+//    chBSemWait(&smph);
 
   // Coordinates
     sdPut(&SD1, (uint8_t)0x7C);
@@ -134,7 +137,8 @@ static msg_t Thread_LCD(void *p)
     sdPut(&SD1, (uint8_t)0x19);
     sdPut(&SD1, (uint8_t)0x38);
     chThdSleepMilliseconds(10);
-  
+
+
     printDistance();
     printTemperatureAndHumidity();
     printAccelerometer();
@@ -161,7 +165,7 @@ int main(void)
   chBSemInit(&smph, 0);
 
   // Start threads
-  chThdCreateStatic(waThread_LCD, sizeof(waThread_LCD), HIGHPRIO, Thread_LCD, NULL);
+  chThdCreateStatic(waThread_LCD, sizeof(waThread_LCD), NORMALPRIO, Thread_LCD, NULL);
   chThdCreateStatic(waThread_ARDUINO, sizeof(waThread_ARDUINO), NORMALPRIO, Thread_ARDUINO, NULL);
   chThdCreateStatic(waThread_ADXL, sizeof(waThread_ADXL), NORMALPRIO, Thread_ADXL, NULL);
 
@@ -199,7 +203,7 @@ void initializeI2C()
 void initializeAccelerometer()
 {
 
-  uint8_t request[2] = {POWER_CTL, 0x00};
+  uint8_t request[2] = {0x2D, 0x00};
   uint8_t result = 0;
 
   i2cMasterTransmit(
@@ -220,7 +224,7 @@ void initializeAccelerometer()
       &result, 0);
 
 	chThdSleepMilliseconds(10);
-   	request[0] = DATA_FORMAT;
+   	request[0] = 0x31;
     request[1] = 0x01;
   i2cMasterTransmit(
       &I2C0, DEVICE_ADDRESS, request, 2,
