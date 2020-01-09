@@ -127,18 +127,9 @@ static msg_t Thread_LCD(void *p)
   {
 //    chBSemWait(&smph);
 
-  // Coordinates
-    sdPut(&SD1, (uint8_t)0x7C);
-    sdPut(&SD1, (uint8_t)0x18);
-    sdPut(&SD1, (uint8_t)0x38);//altura, 56 pixels, de baixo para cima
-    chThdSleepMilliseconds(10);
-    
-    sdPut(&SD1, (uint8_t)0x7C);
-    sdPut(&SD1, (uint8_t)0x19);
-    sdPut(&SD1, (uint8_t)0x38);
-    chThdSleepMilliseconds(10);
-
-
+    // Coordinates
+    setLCDCoordinates((uint8_t)0, (uint8_t)56);
+	  
     printDistance();
     printTemperatureAndHumidity();
     printAccelerometer();
@@ -149,6 +140,22 @@ static msg_t Thread_LCD(void *p)
   return 0;
 }
 
+void setLCDCoordinates(uint8_t x,  uint8_t y)
+{
+    // set X
+    sdPut(&SD1, (uint8_t)0x7C);
+    sdPut(&SD1, (uint8_t)0x18);
+    // sdPut(&SD1, (uint8_t)0x38);
+    sdPut(&SD1, x);
+    chThdSleepMilliseconds(10);
+	
+    // set Y    
+    sdPut(&SD1, (uint8_t)0x7C);
+    sdPut(&SD1, (uint8_t)0x19);
+    // sdPut(&SD1, (uint8_t)0x38);
+    sdPut(&SD1, y);
+    chThdSleepMilliseconds(10);
+}
 /*
  * Application entry point.
  */
