@@ -19,8 +19,7 @@
 BSEMAPHORE_DECL(smph,0);
 
 int x, y, z;
-char distance[4], temperature[4], humidity[4];
-char msg[100];
+char distance[4] = {0, 0, 0, 0}, temperature[4] = {0, 0, 0, 0}, humidity[4] = {0, 0, 0, 0};
 uint8_t received[10];
 
 void printAccelerometer(void);
@@ -38,7 +37,7 @@ static msg_t Thread_ARDUINO(void *p)
   uint8_t request = SENSORS;
 
   // Some time to allow slaves initialization
-  chThdSleepMilliseconds(2000);
+  chThdSleepMilliseconds(1000);
 
   while (TRUE)
   {
@@ -55,15 +54,15 @@ static msg_t Thread_ARDUINO(void *p)
     distance[0] = received[0];
     distance[1] = received[1];
     distance[2] = received[2];
-    distance[3] = 0;
+    //distance[3] = 0;
     temperature[0] = received[3];
     temperature[1] = received[4];
     temperature[2] = received[5];
-    temperature[3] = 0;
+    //temperature[3] = 0;
     humidity[0] = received[6];
     humidity[1] = received[7];
     humidity[2] = received[8];
-    humidity[3] = 0;
+    //humidity[3] = 0;
 
 
     chThdSleepMilliseconds(1000);
@@ -76,21 +75,20 @@ static msg_t Thread_ADXL(void *p)
 {
   (void)p;
   chRegSetThreadName("Thread_ADXL");
-
+  
   uint8_t result[] = {0, 0, 0, 0, 0, 0};
   int data = 0x32;
-	
+  chThdSleepMilliseconds(1000);
+
   while (TRUE)
   {
 	  i2cAcquireBus(&I2C0);
-    //chBSemWait(&smph);
 
     i2cMasterTransmit(
 		&I2C0, DEVICE_ADDRESS, &data, 1,
         result, 6);
 		
 	i2cReleaseBus(&I2C0);
-    chThdSleepMilliseconds(1000);
     /*
     chprintf((BaseSequentialStream *)&SD1, "A: %d ", result[0]);
         chThdSleepMilliseconds(10);
@@ -109,10 +107,7 @@ static msg_t Thread_ADXL(void *p)
     y = (((int)result[3]) << 8) | result[2];
     z = (((int)result[5]) << 8) | result[4];
 
-	chThdSleepMilliseconds(4000);
-
-    //chBSemSignal(&smph);
-    
+	chThdSleepMilliseconds(1000);    
   }
   return 0;
 }
@@ -125,17 +120,12 @@ static msg_t Thread_LCD(void *p)
 
   while (TRUE)
   {
-//    chBSemWait(&smph);
-
-    // Coordinates
-    setLCDCoordinates((uint8_t)0, (uint8_t)56);
 	  
     printDistance();
     printTemperatureAndHumidity();
     printAccelerometer();
 
     chThdSleepMilliseconds(5000);
-    chBSemSignal(&smph);
   }
   return 0;
 }
@@ -145,7 +135,7 @@ void setLCDCoordinates(uint8_t x,  uint8_t y)
     // set X
     sdPut(&SD1, (uint8_t)0x7C);
     sdPut(&SD1, (uint8_t)0x18);
-    // sdPut(&SD1, (uint8_t)0x38);
+     //sdPut(&SD1, (uint8_t)0x38);
     sdPut(&SD1, x);
     chThdSleepMilliseconds(10);
 	
@@ -242,13 +232,22 @@ void initializeAccelerometer()
 
 void printDistance()
 {
+    
+    setLCDCoordinates((uint8_t)0, (uint8_t)56);
+        chThdSleepMilliseconds(10);
     chprintf((BaseSequentialStream *)&SD1, "Distance: %s cm", distance);
         chThdSleepMilliseconds(10);
 }
 
 void printTemperatureAndHumidity()
 {
+
+    setLCDCoordinates((uint8_t)0, (uint8_t)48);
+        chThdSleepMilliseconds(10);
     chprintf((BaseSequentialStream *)&SD1, "Temperature: %s deg C", temperature);
+        chThdSleepMilliseconds(10);
+        
+    setLCDCoordinates((uint8_t)0, (uint8_t)40);
         chThdSleepMilliseconds(10);
 	chprintf((BaseSequentialStream *)&SD1, "Humidity: %s percent", humidity);
 	    chThdSleepMilliseconds(10);
@@ -256,10 +255,19 @@ void printTemperatureAndHumidity()
 
 void printAccelerometer()
 {
-    chprintf((BaseSequentialStream *)&SD1, "X: %d ", x);
+
+    setLCDCoordinates((uint8_t)0, (uint8_t)32);
         chThdSleepMilliseconds(10);
-    chprintf((BaseSequentialStream *)&SD1, "Y: %d ", y);
+    chprintf((BaseSequentialStream *)&SD1, "X: %05d", x);
         chThdSleepMilliseconds(10);
-    chprintf((BaseSequentialStream *)&SD1, "Z: %d ", z);
+
+    setLCDCoordinates((uint8_t)0, (uint8_t)24);
+        chThdSleepMilliseconds(10);
+    chprintf((BaseSequentialStream *)&SD1, "Y: %05d", y);
+        chThdSleepMilliseconds(10);
+
+    setLCDCoordinates((uint8_t)0, (uint8_t)16);
+        chThdSleepMilliseconds(10);
+    chprintf((BaseSequentialStream *)&SD1, "Z: %05d", z);
         chThdSleepMilliseconds(10);
 }
