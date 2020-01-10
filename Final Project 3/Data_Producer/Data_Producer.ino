@@ -3,8 +3,7 @@
 #include "SoftwareSerial.h"
 #include <DHT.h>
 
-// Defines the PINS which will be used throught the code
-#define SLAVE_ADDR 0x04
+// Defines
 #define TRIG_PIN 12
 #define ECHO_PIN 10
 #define DHTPIN 7
@@ -12,14 +11,10 @@
 
 // Variables
 int duration, distance, temperature, humidity;
+DHT dht = DHT(DHTPIN, DHTTYPE); // Initialize DHT sensor for normal 16mhz Arduino:
 
-// Initialize DHT sensor for normal 16mhz Arduino:
-DHT dht = DHT(DHTPIN, DHTTYPE);
-
-// Defines the PINS which will be used for the serial communication with the XBee
 SoftwareSerial xbeeSerial(2, 3);
 
-// Initial SetUp
 void setup() {
   
   //Serial Port begin
@@ -29,46 +24,43 @@ void setup() {
   //Define inputs and outputs
   pinMode(TRIG_PIN, OUTPUT);
   pinMode(ECHO_PIN, INPUT);
-
+  
   // Setup DHT11 sensor:
   dht.begin();
-
-  // Used to facilitate the identification of the Serial Monitor 
+  
   Serial.println("Data Producer");
+  delay(75);
 }
 
-// Main execution
 void loop() {
 
-  // Collecting data from the sensors
+  char a;
+  while (!xbeeSerial.available());
+  a = xbeeSerial.read();
+  delay(75);
+  
+  if(a == '1')
+    getData();
+}
+
+void getData(){
+  
   setUltrasonic();
   setDHT11();
-  
-  // Sending the data
   sendFunc();
 }
 
-// Processes the sensors data and forwards it to the XBee Serial
 void sendFunc(){
-
-  // Printing on the Serial Monitor
+    
   printDistance();
   printDHT11();
-
-  // Variable that will store the data in the correct format to be sent
-  char msg[20];
-
-  // Aggregates the 3 values into a single char array, separated by 'x' and with a 'y' as end of line
+  char msg[13];
   sprintf(msg, "%03dx%03dx%03dy", distance, temperature, humidity);
-
-  // Sends the aggregated char array via the Xbee
+  delay(75);
   xbeeSerial.print(msg);
-
-  // Waits 5 seconds
-  delay(5000);
+  delay(75);
 }
 
-// SetUps the 
 void setUltrasonic(){
   ultrasonicTrigger();
   readDuration();
@@ -85,7 +77,7 @@ void ultrasonicTrigger(){
   digitalWrite(TRIG_PIN, LOW);
 }
 
-// Reads the signal from the sensor: a HIGH pulse whose duration is the time (in microseconds) from the sending of the ping to the reception of its echo off of an object.
+// Read the signal from the sensor: a HIGH pulse whose duration is the time (in microseconds) from the sending of the ping to the reception of its echo off of an object.
 void readDuration(){  
   pinMode(ECHO_PIN, INPUT);
   duration = pulseIn(ECHO_PIN, HIGH);
@@ -101,14 +93,15 @@ void convertToCm(){
 // Prints the measured distance in cm into the Serial Display
 void printDistance() {
   Serial.print("\nDistance: ");
+  delay(75);
   Serial.print(distance);
+  delay(75);
   Serial.println(" cm");
+  delay(75);
 }
 
-// Gathers data from DHT11 sensor
 void setDHT11(){
-  // Wait a few seconds between measurements:
-  delay(2000);
+
   // Read the humidity in %:
   humidity = dht.readHumidity();
   // Read the temperature as Celsius:
@@ -118,11 +111,17 @@ void setDHT11(){
 // Prints the measured humidity and temperature into the Serial Display
 void printDHT11() {
   Serial.print("Temperature: ");
+  delay(75);
   Serial.print(temperature);
+  delay(75);
   Serial.print("\xC2\xB0");
+  delay(75);
   Serial.println("C");
+  delay(75);
   Serial.print("Humidity: ");
+  delay(75);
   Serial.print(humidity);
+  delay(75);
   Serial.println("%");
-
+  delay(75);
 }
