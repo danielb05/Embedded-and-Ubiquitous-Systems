@@ -11,7 +11,22 @@
 			Rafael Câmara Pereira
 */
 
-#include "constants.h"
+#include "stdio.h"
+#include "stdlib.h"
+#include "string.h"
+#include "ch.h"
+#include "chvt.h"
+#include "hal.h"
+#include "chprintf.h"
+
+// Device address
+#define DEVICE_ADDRESS 0x53
+
+// Slave address
+#define slave_address 0x04
+
+// Requests
+#define SENSORS 1
 
 // Global variables
 int x, y, z;

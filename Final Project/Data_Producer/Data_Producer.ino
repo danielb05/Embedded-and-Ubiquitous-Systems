@@ -1,3 +1,16 @@
+/*
+			University of Lleida
+	Master Of Science in Computer Science
+		Embedded And Ubiquitous Systems
+				  Professor
+		  Fernando Guirado Fernández
+				Final Project
+				  Students
+			Antonio Expósito Solis
+			Daniel Vieira Cordeiro
+			Rafael Câmara Pereira
+*/
+
 // Include the libraries:
 #include <Adafruit_Sensor.h>
 #include "SoftwareSerial.h"
